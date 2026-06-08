@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Discount">
+<title>Discount Calc</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:#0D1117;color:#F5F2EC;font-family:'DM Sans',sans-serif;padding:max(env(safe-area-inset-top),20px) 18px max(env(safe-area-inset-bottom),24px);min-height:100vh;}
+.accent-bar{position:fixed;top:0;left:0;right:0;height:4px;z-index:100;background:linear-gradient(90deg,#00A8E8 0%,#0077B6 60%,#023E8A 100%);}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.brand svg{width:38px;height:38px;}
+.brand-text .name{font-family:'Bebas Neue';font-size:24px;letter-spacing:1.5px;line-height:1;}
+.brand-text .tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#5A8FB8;font-weight:700;margin-top:3px;}
+.subtitle{font-size:12px;color:#6B7785;margin-bottom:20px;font-weight:500;}
+.tabbar{display:flex;gap:6px;margin-bottom:18px;background:#161C24;padding:5px;border-radius:10px;}
+.tab{flex:1;padding:11px 6px;border-radius:7px;border:none;background:transparent;color:#6B7785;font-family:'DM Sans';font-size:12px;font-weight:900;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;}
+.tab.on{background:#2A3441;color:#00A8E8;}
+.page{display:none;}.page.show{display:block;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#6B7785;margin-bottom:7px;font-weight:700;}
+.ibox{display:flex;align-items:center;background:#161C24;border:1px solid #2A3441;border-radius:10px;}
+.ibox .pre{font-size:22px;color:#6B7785;padding-left:14px;font-weight:700;}
+.ibox input{background:transparent;border:none;outline:none;color:#F5F2EC;font-family:'DM Sans';font-size:30px;font-weight:900;padding:14px 12px;width:100%;}
+.ibox input::-webkit-inner-spin-button,.ibox input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.ibox .u{font-size:14px;color:#6B7785;padding-right:14px;font-weight:700;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{padding:9px 14px;border-radius:50px;border:1px solid #2A3441;background:transparent;color:#7FB5D5;font-family:'DM Sans';font-size:14px;font-weight:700;cursor:pointer;}
+.chip:active{background:rgba(0,168,232,0.15);}
+.bigout{background:linear-gradient(135deg,rgba(0,168,232,0.15),rgba(0,119,182,0.1));border:2px solid #00A8E8;border-radius:16px;padding:22px;text-align:center;margin:18px 0 12px;}
+.bigout .lbl{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#00A8E8;font-weight:700;margin-bottom:8px;}
+.bigout .val{font-size:54px;font-weight:900;color:#fff;line-height:1;}
+.subgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.subout{background:#161C24;border:1px solid #2A3441;border-radius:12px;padding:16px;text-align:center;}
+.subout .lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#6B7785;font-weight:700;margin-bottom:6px;}
+.subout .val{font-size:26px;font-weight:900;color:#F5F2EC;}
+.subout.save .val{color:#3DD68C;}
+.tax-row{display:flex;align-items:center;justify-content:space-between;background:#161C24;border:1px solid #2A3441;border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+.tax-row .tl{font-size:13px;font-weight:700;color:#F5F2EC;}
+.tax-row .tctl{display:flex;align-items:center;gap:10px;}
+.tax-row input{width:60px;background:#0D1117;border:1px solid #2A3441;border-radius:6px;color:#F5F2EC;font-family:'DM Sans';font-size:16px;font-weight:700;padding:6px 8px;text-align:center;outline:none;}
+.toggle{width:48px;height:28px;border-radius:50px;background:#2A3441;border:none;cursor:pointer;position:relative;transition:background 0.2s;}
+.toggle.on{background:#00A8E8;}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform 0.2s;}
+.toggle.on::after{transform:translateX(20px);}
+.bigout.bad{background:linear-gradient(135deg,rgba(229,77,77,0.18),rgba(180,40,40,0.1));border-color:#E54D4D;animation:glowbad 1.6s ease-in-out infinite;}
+.bigout.bad .lbl{color:#E54D4D;}
+.bigout.good .lbl{color:#3DD68C;}
+.bigout.good{border-color:#3DD68C;animation:glowgood 1.6s ease-in-out infinite;}
+@keyframes glowbad{0%,100%{box-shadow:0 0 14px 1px rgba(229,77,77,0.40);}50%{box-shadow:0 0 30px 4px rgba(229,77,77,0.75);}}
+@keyframes glowgood{0%,100%{box-shadow:0 0 14px 1px rgba(61,214,140,0.40);}50%{box-shadow:0 0 30px 4px rgba(61,214,140,0.75);}}
+.note{font-size:11px;color:#6B7785;line-height:1.7;font-weight:500;margin-top:8px;text-align:center;}
+.footer{text-align:center;margin-top:22px;font-size:9px;color:#3A4654;line-height:1.7;letter-spacing:0.5px;}
+.stack-add{width:100%;padding:12px;border-radius:10px;border:1px dashed #2A3441;background:transparent;color:#7FB5D5;font-family:'DM Sans';font-size:13px;font-weight:700;cursor:pointer;margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div class="accent-bar"></div>
+<div class="brand">
+<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="44" height="44" rx="8" fill="#0F172A"/><path d="M22 8L34 16V28L22 36L10 28V16L22 8Z" stroke="#00A8E8" stroke-width="1.5" fill="none"/><path d="M22 14V22M22 22L16 26M22 22L28 26" stroke="#1D4ED8" stroke-width="1.5" stroke-linecap="round"/><circle cx="22" cy="22" r="2.5" fill="#00A8E8"/></svg>
+<div class="brand-text"><div class="name">Discount Calc</div><div class="tag">Quick Shopping Math</div></div>
+</div>
+<div class="subtitle" id="subtitle">What's it really cost after the % off?</div>
+
+<div class="tabbar">
+<button class="tab on" id="tab-disc" onclick="show('disc')">% Off</button>
+<button class="tab" id="tab-rev" onclick="show('rev')">Find %</button>
+</div>
+
+<!-- DISCOUNT -->
+<div class="page show" id="page-disc">
+<div class="field"><label>Original price</label><div class="ibox"><span class="pre">$</span><input id="price" type="number" inputmode="decimal" placeholder="0.00" oninput="calc()"></div></div>
+<div class="field"><label>Percent off</label><div class="ibox"><input id="pct" type="number" inputmode="decimal" placeholder="0" oninput="calc()"><span class="u">% OFF</span></div></div>
+<div class="chips">
+<button class="chip" onclick="setPct(10)">10%</button>
+<button class="chip" onclick="setPct(15)">15%</button>
+<button class="chip" onclick="setPct(20)">20%</button>
+<button class="chip" onclick="setPct(25)">25%</button>
+<button class="chip" onclick="setPct(30)">30%</button>
+<button class="chip" onclick="setPct(40)">40%</button>
+<button class="chip" onclick="setPct(50)">50%</button>
+<button class="chip" onclick="setPct(70)">70%</button>
+</div>
+<button class="stack-add" id="stackbtn" onclick="toggleStack()">+ add extra % (stacked discount)</button>
+<div class="field" id="stackfield" style="display:none"><label>Extra percent off (applied after)</label><div class="ibox"><input id="pct2" type="number" inputmode="decimal" placeholder="0" oninput="calc()"><span class="u">% OFF</span></div></div>
+
+<div class="tax-row">
+<div class="tl">Province / Tax</div>
+<div class="tctl"><select id="prov" onchange="provChange()" style="background:#0D1117;border:1px solid #2A3441;border-radius:6px;color:#F5F2EC;font-family:'DM Sans';font-size:14px;font-weight:700;padding:7px 8px;outline:none"><option value="5">AB · 5%</option><option value="12">BC · 12%</option><option value="12">MB · 12%</option><option value="15">NB · 15%</option><option value="15">NL · 15%</option><option value="14">NS · 14%</option><option value="13">ON · 13%</option><option value="15">PE · 15%</option><option value="14.975">QC · 14.975%</option><option value="11">SK · 11%</option><option value="5">NT · 5%</option><option value="5">NU · 5%</option><option value="5">YT · 5%</option></select><button class="toggle on" id="taxtog" onclick="toggleTax()"></button></div>
+</div>
+
+<div class="tax-row">
+<div class="tl">Good deal at</div>
+<div class="tctl"><input id="thresh" type="number" inputmode="decimal" value="50" oninput="calc()"><span style="color:#6B7785;font-weight:700">% off+</span></div>
+</div>
+
+<div class="bigout" id="bigout"><div class="lbl" id="biglbl">You Pay</div><div class="val" id="final">$0.00</div><div id="finalfx" style="font-size:14px;color:#7FB5D5;font-weight:700;margin-top:8px"></div><div id="dealmsg" style="font-size:13px;font-weight:900;margin-top:10px;letter-spacing:0.5px"></div></div>
+<div class="subgrid">
+<div class="subout save"><div class="lbl">You Save</div><div class="val" id="saved">$0.00</div></div>
+<div class="subout"><div class="lbl">Before Tax</div><div class="val" id="subtotal">$0.00</div></div>
+</div>
+<div class="note" id="note"></div>
+
+<div style="margin-top:24px;border-top:1px solid #1A222C;padding-top:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#6B7785;font-weight:700">Currency Converter</div>
+<button onclick="fetchRates()" style="background:transparent;border:1px solid #2A3441;border-radius:6px;color:#7FB5D5;font-family:'DM Sans';font-size:10px;font-weight:700;padding:5px 10px;cursor:pointer">↻ refresh</button>
+</div>
+<div class="field" style="margin-bottom:10px"><label>CAD</label><div class="ibox"><span class="pre">$</span><input id="fx-cad" type="number" inputmode="decimal" placeholder="0.00" oninput="fxFrom('cad')"></div></div>
+<div class="field" style="margin-bottom:10px"><label>USD</label><div class="ibox"><span class="pre">$</span><input id="fx-usd" type="number" inputmode="decimal" placeholder="0.00" oninput="fxFrom('usd')"></div></div>
+<div class="field" style="margin-bottom:8px"><label>PHP</label><div class="ibox"><span class="pre">₱</span><input id="fx-php" type="number" inputmode="decimal" placeholder="0.00" oninput="fxFrom('php')"></div></div>
+<div style="font-size:11px;color:#6B7785;font-weight:600;text-align:center" id="fxbox"></div>
+<div style="font-size:9px;color:#3A4654;margin-top:6px;text-align:center" id="fxtime"></div>
+<button onclick="pullFinal()" style="width:100%;margin-top:10px;padding:11px;border-radius:10px;border:1px dashed #2A3441;background:transparent;color:#7FB5D5;font-family:'DM Sans';font-size:12px;font-weight:700;cursor:pointer">↑ use "You Pay" total above</button>
+</div>
+
+<div class="footer">VITAL AIR MECHANICAL INC. · EDMONTON, AB</div>
+</div>
+<div class="page" id="page-rev">
+<div class="field"><label>Original price</label><div class="ibox"><span class="pre">$</span><input id="rorig" type="number" inputmode="decimal" placeholder="0.00" oninput="calcRev()"></div></div>
+<div class="field"><label>Sale price</label><div class="ibox"><span class="pre">$</span><input id="rsale" type="number" inputmode="decimal" placeholder="0.00" oninput="calcRev()"></div></div>
+<div class="bigout"><div class="lbl">That's</div><div class="val" id="rpct">0%</div></div>
+<div class="subgrid">
+<div class="subout save"><div class="lbl">You Save</div><div class="val" id="rsaved">$0.00</div></div>
+<div class="subout"><div class="lbl">Off Original</div><div class="val" id="rpct2">0%</div></div>
+</div>
+<div class="note">Enter what it was and what it's marked down to — see the real % off.</div>
+<div class="footer">VITAL AIR MECHANICAL INC. · EDMONTON, AB</div>
+</div>
+
+<script>
+let stackOn=false, taxOn=true;
+function money(v){return '$'+v.toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function show(p){['disc','rev'].forEach(x=>{document.getElementById('page-'+x).className='page'+(x===p?' show':'');document.getElementById('tab-'+x).className='tab'+(x===p?' on':'');});document.getElementById('subtitle').textContent=p==='disc'?"What's it really cost after the % off?":"Know the prices? Find the % off.";}
+function setPct(v){document.getElementById('pct').value=v;calc();}
+function toggleStack(){stackOn=!stackOn;document.getElementById('stackfield').style.display=stackOn?'block':'none';document.getElementById('stackbtn').textContent=stackOn?'− remove extra %':'+ add extra % (stacked discount)';calc();}
+function toggleTax(){taxOn=!taxOn;document.getElementById('taxtog').className='toggle'+(taxOn?' on':'');calc();}
+function provChange(){calc();}
+
+function calc(){
+  const price=parseFloat(document.getElementById('price').value)||0;
+  const pct=parseFloat(document.getElementById('pct').value)||0;
+  const pct2=stackOn?(parseFloat(document.getElementById('pct2').value)||0):0;
+  const taxRate=taxOn?(parseFloat(document.getElementById('prov').value)||0):0;
+  let afterFirst=price*(1-pct/100);
+  let afterSecond=afterFirst*(1-pct2/100);
+  const saved=price-afterSecond;
+  const tax=afterSecond*taxRate/100;
+  const final=afterSecond+tax;
+  document.getElementById('subtotal').textContent=money(afterSecond);
+  document.getElementById('saved').textContent=money(saved);
+  document.getElementById('final').textContent=money(final);
+  lastFinalCAD=final;
+  var ffx=document.getElementById('finalfx');
+  if(ffx){ ffx.textContent = final>0 ? ('≈ '+(final*RATE.usd).toFixed(2)+' USD · '+(final*RATE.php).toFixed(2)+' PHP') : ''; }
+  // deal judgment
+  var effPct = price>0 ? (saved/price*100) : 0;
+  var thresh = parseFloat(document.getElementById('thresh').value)||0;
+  var box=document.getElementById('bigout'), msg=document.getElementById('dealmsg');
+  if(price>0 && (pct>0||pct2>0)){
+    if(effPct>=thresh){ box.className='bigout good'; msg.style.color='#3DD68C'; msg.textContent='✓ GOOD DEAL — '+effPct.toFixed(0)+'% off'; }
+    else { box.className='bigout bad'; msg.style.color='#E54D4D'; msg.textContent='✗ NOT A GREAT DEAL — only '+effPct.toFixed(0)+'% off (want '+thresh.toFixed(0)+'%+)'; }
+  } else { box.className='bigout'; msg.textContent=''; }
+  let n='';
+  if(price>0){
+    const effPct=price>0?(saved/price*100):0;
+    if(stackOn&&pct2>0)n=`${pct}% then ${pct2}% = ${effPct.toFixed(1)}% off total (not ${(pct+pct2)}%)`;
+    else if(pct>0)n=`${pct}% off ${money(price)}`;
+    if(taxOn){const pv=document.getElementById('prov');n+=` · +${pv.options[pv.selectedIndex].text.split('·')[0].trim()} tax ${money(tax)}`;}
+  }
+  document.getElementById('note').textContent=n;
+}
+function calcRev(){
+  const o=parseFloat(document.getElementById('rorig').value)||0;
+  const s=parseFloat(document.getElementById('rsale').value)||0;
+  if(o>0&&s>=0){const saved=o-s;const pct=saved/o*100;
+    document.getElementById('rpct').textContent=pct.toFixed(1)+'% OFF';
+    document.getElementById('rpct2').textContent=pct.toFixed(1)+'%';
+    document.getElementById('rsaved').textContent=money(saved);
+  } else {
+    document.getElementById('rpct').textContent='0%';document.getElementById('rpct2').textContent='0%';document.getElementById('rsaved').textContent='$0.00';
+  }
+}
+
+// ---- currency: live rates with baked fallback, 3-way converter ----
+var FALLBACK={usd:0.73, php:44.30, date:'Jun 2026'};
+var RATE={usd:FALLBACK.usd, php:FALLBACK.php, live:false};
+var lastFinalCAD=0;
+
+function setFxStatus(){
+  var box=document.getElementById('fxbox'), timeEl=document.getElementById('fxtime');
+  box.innerHTML='Rate: <b style="color:#7FB5D5">$1 CAD = '+RATE.usd.toFixed(4)+' USD · '+RATE.php.toFixed(2)+' PHP</b>';
+  timeEl.textContent = RATE.live ? ('Live · updated '+new Date().toLocaleString('en-CA')) : ('Approx ('+FALLBACK.date+') · tap refresh online for live');
+}
+function fxFrom(src){
+  var cad;
+  if(src==='cad'){cad=parseFloat(document.getElementById('fx-cad').value)||0;}
+  else if(src==='usd'){cad=(parseFloat(document.getElementById('fx-usd').value)||0)/RATE.usd;}
+  else {cad=(parseFloat(document.getElementById('fx-php').value)||0)/RATE.php;}
+  if(src!=='cad')document.getElementById('fx-cad').value=cad?cad.toFixed(2):'';
+  if(src!=='usd')document.getElementById('fx-usd').value=cad?(cad*RATE.usd).toFixed(2):'';
+  if(src!=='php')document.getElementById('fx-php').value=cad?(cad*RATE.php).toFixed(2):'';
+}
+function pullFinal(){
+  document.getElementById('fx-cad').value=lastFinalCAD.toFixed(2);
+  fxFrom('cad');
+}
+function fetchRates(){
+  setFxStatus();
+  try{
+    fetch('https://api.exchangerate-api.com/v4/latest/CAD')
+      .then(function(res){return res.json();})
+      .then(function(data){ if(data&&data.rates&&data.rates.USD){RATE.usd=data.rates.USD;RATE.php=data.rates.PHP;RATE.live=true;setFxStatus();calc();} })
+      .catch(function(){});
+  }catch(e){}
+}
+
+calc(); setFxStatus(); fetchRates();
+</script>
+</body>
+</html>
